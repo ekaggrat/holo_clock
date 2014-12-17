@@ -6,3 +6,6 @@ http://hackaday.com/2014/12/01/3d-printed-clock-tells-time-with-gears/
 
 
 http://www.thingiverse.com/thing:570797
+
+
+http://www.ekaggrat.net/index.php?/lab/holo-clock/

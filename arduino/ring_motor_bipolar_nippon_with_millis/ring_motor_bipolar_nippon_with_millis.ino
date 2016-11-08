@@ -1,4 +1,11 @@
-int number_of_steps = 288;
+
+
+//teeth in big gear 178
+// teeth in small gear 20
+// gear ratio 8.9
+// motor steps per revolution 400
+
+int number_of_steps = 200;
 int motor_pin_1 = 9;
 int motor_pin_2 = 10;
 int motor_pin_3 = 11;
@@ -11,9 +18,20 @@ int enablepin = 8;
 int whatspeed = 40;
 int last_step_time =0;
 int step_number = 0;
-int blinkDelay = 939;//945//938;//968;//995;
+int blinkDelay = 1000;
+unsigned long MoveDelay = 60000;//60000;
 int step_delay = 60L * 1000L / number_of_steps / whatspeed;
 int step_direction = 0;
+bool ledState = false;
+unsigned long previousMillis=0;
+unsigned long previousMillisMotor=0;
+int moveCount = 0;
+int countDelay = 0;
+
+// change this t0 adjjust lag/gain in time
+int lastmove = 5; //22 for 12v , actual 20
+
+
 void setup() {
 
 
@@ -24,34 +42,41 @@ void setup() {
   pinMode(buttonPin,INPUT);
   pinMode(ledpin, OUTPUT);
   pinMode(enablepin,OUTPUT);
-
+  //Serial.begin(9600);
 }
 
 void loop() {
   buttonState = digitalRead(buttonPin);
+  blinkk();
   if (buttonState ==HIGH){
     enablemotor();
-    movestep(20);
+    movemotor(20);
     digitalWrite(ledpin,HIGH);
   }
   else{
-    digitalWrite(ledpin,LOW);
+    
+    unsigned long currentMillisMotor = millis();
 
-    for (int xx = 0; xx<59;xx ++){
+    if ((unsigned long)(currentMillisMotor - previousMillisMotor) >=MoveDelay) {
+enablemotor();
+      if ( moveCount >= 58){
+        movemotor(lastmove);//22//23//25
+        moveCount = 0;
+      }
+      else {
 
-      enablemotor();
-      movestep(42);
-      //delay(100);
+        movemotor(15);
+        moveCount = moveCount + 1;
+      }
       motoroff();
-      blinkk();
+      previousMillisMotor = currentMillisMotor;
     }
-    enablemotor();
-    movestep(89);//85;
-   
+
+
     motoroff();
-    blinkk();
-   //delay(3000);
+
   }
+
 }
 
 
@@ -134,18 +159,17 @@ void stepmotor(int thisStep){
 }
 
 void blinkk(){
-  for (int i = 0 ; i<30;i++){
-    buttonState = digitalRead(buttonPin);
-    if (buttonState ==HIGH){
-      break;
-    }
-    else{
-      digitalWrite(ledpin, HIGH);   // set the LED on
-      delay(blinkDelay);  // 968           // wait for a second
-      digitalWrite(ledpin, LOW);    // set the LED off
-      delay(blinkDelay); //968
-    } 
-  }
+
+  unsigned long currentMillis = millis();
+  //motoroff();
+  if ((unsigned long)(currentMillis - previousMillis) >= blinkDelay) {
+
+    ledState = !ledState; 
+    digitalWrite(ledpin, ledState); 
+
+    previousMillis = currentMillis;
+  } 
+
 }
 
 void motoroff(){
@@ -155,6 +179,39 @@ void motoroff(){
   digitalWrite(motor_pin_3, LOW);
   digitalWrite(motor_pin_4, LOW);
 }
+
+void movemotor(int m){
+
+  for (int x=0; x< m;x++){ 
+    digitalWrite(motor_pin_1, HIGH);
+    digitalWrite(motor_pin_2, LOW);
+    digitalWrite(motor_pin_3, HIGH);
+    digitalWrite(motor_pin_4, LOW);
+    delay(step_delay);
+    digitalWrite(motor_pin_1, LOW);
+    digitalWrite(motor_pin_2, HIGH);
+    digitalWrite(motor_pin_3, HIGH);
+    digitalWrite(motor_pin_4, LOW);
+    delay(step_delay);
+    digitalWrite(motor_pin_1, LOW);
+    digitalWrite(motor_pin_2, HIGH);
+    digitalWrite(motor_pin_3, LOW);
+    digitalWrite(motor_pin_4, HIGH);
+    delay(step_delay);
+    digitalWrite(motor_pin_1, HIGH);
+    digitalWrite(motor_pin_2, LOW);
+    digitalWrite(motor_pin_3, LOW);
+    digitalWrite(motor_pin_4, HIGH);
+    delay(step_delay);
+  }
+}
+
+
+
+
+
+
+
 
 
 
